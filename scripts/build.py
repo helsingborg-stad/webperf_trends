@@ -9,6 +9,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNS = ROOT / "data" / "runs"
@@ -158,6 +159,85 @@ def detail_markup(value: str) -> str:
     return "<br>".join(html.escape(line) for line in value.splitlines())
 
 
+def report_key(value: str) -> str:
+    """Normalize the visible report heading for joining it to raw findings."""
+    first_line = value.splitlines()[0] if value else ""
+    return re.sub(r"\s+\((?:fel|error|varning|warning|löst|resolved)\)$", "", first_line, flags=re.I).strip().casefold()
+
+
+def issue_index(test: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    index: dict[str, list[dict[str, Any]]] = {}
+    groups = test.get("data", {}).get("groups", {}) if isinstance(test.get("data"), dict) else {}
+    if not isinstance(groups, dict):
+        return index
+    for group in groups.values():
+        if not isinstance(group, dict):
+            continue
+        for issue in group.get("issues", []):
+            if not isinstance(issue, dict):
+                continue
+            for title in (issue.get("report_title"), issue.get("text")):
+                if isinstance(title, str) and report_key(title):
+                    index.setdefault(report_key(title), []).append(issue)
+                    break
+    return index
+
+
+def safe_href(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    return value if urlparse(value).scheme in {"http", "https"} else None
+
+
+def finding_markup(issues: list[dict[str, Any]]) -> str:
+    """Render concrete source locations attached by Core, when available."""
+    entries: list[str] = []
+    seen: set[tuple[str, str, str]] = set()
+    for issue in issues:
+        docs = [safe_href(url) for url in issue.get("resources", [])]
+        for sub_issue in issue.get("subIssues", []):
+            if not isinstance(sub_issue, dict):
+                continue
+            evidence = sub_issue.get("evidence", [])
+            if not evidence and isinstance(sub_issue.get("extra"), dict):
+                evidence = [sub_issue["extra"]]
+            evidence = evidence if isinstance(evidence, list) else []
+            for node in evidence or [{}]:
+                if not isinstance(node, dict):
+                    continue
+                selector = str(node.get("selector", "")).strip()
+                snippet = str(node.get("snippet", "")).strip()
+                position = ""
+                if sub_issue.get("line") is not None:
+                    position = f"Rad {sub_issue['line']}"
+                    if sub_issue.get("column") is not None:
+                        position += f", kolumn {sub_issue['column']}"
+                source = safe_href(sub_issue.get("url"))
+                identity = (source or "", selector, snippet)
+                if identity in seen or not any(identity) and not position:
+                    continue
+                seen.add(identity)
+                rows = []
+                if source:
+                    rows.append(f"<dt>Källa</dt><dd><a href=\"{html.escape(source)}\">Öppna berörd resurs</a></dd>")
+                if position:
+                    rows.append(f"<dt>Position</dt><dd>{html.escape(position)}</dd>")
+                if selector:
+                    rows.append(f"<dt>CSS-selector</dt><dd><code>{html.escape(selector)}</code></dd>")
+                if snippet:
+                    rows.append(f"<dt>HTML vid felet</dt><dd><code class=\"html-snippet\">{html.escape(snippet)}</code></dd>")
+                explanation = str(node.get("explanation", "")).strip()
+                if explanation:
+                    rows.append(f"<dt>Förklaring</dt><dd>{html.escape(explanation)}</dd>")
+                entries.append(f"<dl class=\"finding-location\">{''.join(rows)}</dl>")
+        for doc in docs:
+            if doc:
+                entries.append(f"<p class=\"finding-doc\"><a href=\"{html.escape(doc)}\">Läs regelns dokumentation</a></p>")
+    if not entries:
+        return ""
+    return "<details class=\"finding-details\"><summary>Hitta felet</summary>" + "".join(entries) + "</details>"
+
+
 def result_table(items: list[dict[str, str]]) -> str:
     rows = "".join(
         "<tr class=\"result-row result-row--{status}\">"
@@ -168,7 +248,7 @@ def result_table(items: list[dict[str, str]]) -> str:
             icon={"error": "✕", "warning": "!", "resolved": "✓"}[item["status"]],
             label=STATUS_LABEL[item["status"]],
             title=html.escape(item["title"]),
-            detail=detail_markup(item["detail"]) or "—",
+            detail=(detail_markup(item["detail"]) or "—") + finding_markup(item.get("issues", [])),
         )
         for item in items
     )
@@ -180,8 +260,10 @@ def result_table(items: list[dict[str, str]]) -> str:
     )
 
 
-def report_section(title: str, body: str) -> str:
+def report_section(title: str, body: str, findings: dict[str, list[dict[str, Any]]]) -> str:
     items = parse_report_items(body)
+    for item in items:
+        item["issues"] = findings.get(report_key(item["title"]), [])
     errors = [item for item in items if item["status"] == "error"]
     warnings = [item for item in items if item["status"] == "warning"]
     resolved = [item for item in items if item["status"] == "resolved"]
@@ -220,7 +302,8 @@ def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> st
         ("Integritet & säkerhet", test.get("report_sec", "")),
         ("Webbstandard", test.get("report_stand", "")),
     ]
-    sections = "".join(report_section(title, body) for title, body in reports)
+    findings = issue_index(test)
+    sections = "".join(report_section(title, body, findings) for title, body in reports)
     raw_href = f"../data/runs/{run['id']}.json"
     url = run["url"] or site.get("url", "")
     progress = run["progress"]
