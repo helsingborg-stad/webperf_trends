@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Historik över Webperf Core-mätningar för Helsingborgs stad.">
+  <title>Webperf trends</title>
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Hoppa till innehållet</a>
+  <header class="site-header">
+    <div><a class="wordmark" href="./">Webperf trends</a><p id="site-name">Laddar mätprofil…</p></div>
+    <p id="last-updated" class="muted" aria-live="polite"></p>
+  </header>
+  <main id="content">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">Löpande kvalitetsuppföljning</p>
+      <h1 id="page-title">Vad har förändrats på webben?</h1>
+      <p class="lede">Webperf Core kör samma mätprofil över tid. Poängen visar riktning; öppna en detaljrapport när en förändring behöver förklaras.</p>
+    </section>
+    <p id="status" class="status" role="status">Laddar resultat…</p>
+    <section id="latest" class="latest" aria-labelledby="latest-title" hidden>
+      <div><p class="eyebrow">Senaste körningen</p><h2 id="latest-title"></h2><p id="latest-url" class="muted"></p></div>
+      <a id="latest-detail" class="button" href="#">Öppna detaljrapport</a>
+      <dl id="score-cards" class="score-cards"></dl>
+    </section>
+    <section class="chart-section" aria-labelledby="score-chart-title">
+      <div class="section-heading"><div><p class="eyebrow">Trend</p><h2 id="score-chart-title">Poäng per område</h2></div><p>Skala 1–5. Saknade värden ritas inte ut.</p></div>
+      <div id="score-chart" class="chart" role="img" aria-label="Trendgraf över Webperf-poäng"></div>
+      <div class="legend" aria-label="Förklaring"><span class="total">Totalt</span><span class="performance">Prestanda</span><span class="a11y">Tillgänglighet</span><span class="security">Integritet & säkerhet</span><span class="standards">Webbstandard</span></div>
+    </section>
+    <section class="chart-section" aria-labelledby="metric-chart-title">
+      <div class="section-heading"><div><p class="eyebrow">Mätvärden</p><h2 id="metric-chart-title">Prestanda över tid</h2></div><label for="metric-select">Visa mått <select id="metric-select"></select></label></div>
+      <div id="metric-chart" class="chart" role="img" aria-label="Trendgraf över valt prestandamått"></div>
+    </section>
+    <section class="history" aria-labelledby="history-title"><div class="section-heading"><div><p class="eyebrow">Historik</p><h2 id="history-title">Alla körningar</h2></div></div>
+      <div class="table-wrap"><table><thead><tr><th scope="col">Tidpunkt</th><th scope="col">Totalt</th><th scope="col">Prestanda</th><th scope="col">Tillgänglighet</th><th scope="col">Detaljer</th></tr></thead><tbody id="history-body"></tbody></table></div>
+    </section>
+  </main>
+  <footer>Rådata och detaljrapporter bygger på <a href="https://github.com/helsingborg-stad/webperf_core">Webperf Core</a>.</footer>
+  <script src="assets/dashboard.js"></script>
+</body>
+</html>
