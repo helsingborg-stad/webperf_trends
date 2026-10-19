@@ -88,6 +88,7 @@ def run_summary(run_file: Path) -> dict[str, Any] | None:
             "completed": metadata.get("completed_tests", []),
             "failed": metadata.get("failed_tests", []),
             "total": metadata.get("tests", []),
+            "active": metadata.get("active_test", ""),
         },
         "detail": f"reports/{run_id}.html",
     }
@@ -124,6 +125,8 @@ def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> st
     failed = ", ".join(str(test) for test in progress["failed"])
     total = len(progress["total"])
     progress_text = f"{len(progress['completed'])} av {total} tester klara"
+    if progress["active"]:
+        progress_text += f" · test {progress['active']} körs"
     if failed:
         progress_text += f" · tester med fel: {failed}"
     return f"""<!doctype html>
