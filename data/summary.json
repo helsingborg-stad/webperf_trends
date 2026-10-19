@@ -256,8 +256,8 @@
     },
     {
       "id": "2026-10-19T131747Z",
-      "date": "2026-10-19T13:32:14.217797",
-      "display_date": "19 Oct 2026, 13:32",
+      "date": "2026-10-19T13:34:51.495252",
+      "display_date": "19 Oct 2026, 13:34",
       "url": "https://helsingborg.se/",
       "scores": {
         "rating": 5.0,
@@ -266,7 +266,15 @@
         "rating_sec": 4.5,
         "rating_stand": 5.0
       },
-      "metrics": {},
+      "metrics": {
+        "mobile:TTFB": 771.0,
+        "mobile:LCP": 2240.0,
+        "mobile:Load": 3580.0,
+        "mobile:TBT": 21.0,
+        "mobile:CLS": 0.0,
+        "mobile:SpeedIndex": 2100.0,
+        "mobile:FCP": 1520.0
+      },
       "meta": {
         "url": "https://helsingborg.se/",
         "tests": [
@@ -302,10 +310,11 @@
           "28",
           "29",
           "30",
-          "2"
+          "2",
+          "15"
         ],
         "failed_tests": [],
-        "active_test": "15",
+        "active_test": "",
         "core_sha": "91022abe0c68800e7eef7df7e5f2797e4f5b8b1f",
         "workflow_run": "39258385961",
         "profile": "weekly-v1 / Sitespeed: 3 iterations"
@@ -326,7 +335,8 @@
           "28",
           "29",
           "30",
-          "2"
+          "2",
+          "15"
         ],
         "failed": [],
         "total": [
@@ -347,7 +357,7 @@
           "2",
           "15"
         ],
-        "active": "15"
+        "active": ""
       },
       "detail": "reports/2026-10-19T131747Z.html"
     }
