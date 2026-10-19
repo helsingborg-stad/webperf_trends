@@ -28,16 +28,12 @@
     <section class="chart-section" aria-labelledby="score-chart-title">
       <div class="section-heading"><div><p class="eyebrow">Trend</p><h2 id="score-chart-title">Poäng per område</h2></div><p>Skala 1–5. Saknade värden ritas inte ut.</p></div>
       <div id="score-chart" class="chart" role="img" aria-label="Trendgraf över Webperf-poäng"></div>
-      <div class="legend" aria-label="Förklaring"><span class="total">Totalt</span><span class="performance">Prestanda</span><span class="a11y">Tillgänglighet</span><span class="security">Integritet & säkerhet</span><span class="standards">Webbstandard</span></div>
+      <div id="score-legend" class="legend" aria-label="Förklaring till Webperf-poäng"></div>
     </section>
     <section class="chart-section" aria-labelledby="metrics-overview-title">
       <div class="section-heading"><div><p class="eyebrow">Mätvärden</p><h2 id="metrics-overview-title">Prestanda – snabb överblick</h2></div><p>Vänster axel: millisekunder. Höger axel: CLS.</p></div>
       <div id="metrics-overview-chart" class="chart" role="img" aria-label="Trendgraf över TTFB, FCP, LCP, Speed Index, laddtid, TBT och CLS"></div>
       <div id="metrics-overview-legend" class="legend metric-legend" aria-label="Förklaring till prestandamåtten"></div>
-    </section>
-    <section class="chart-section metric-detail-section" aria-labelledby="metric-chart-title">
-      <div class="section-heading"><div><p class="eyebrow">Fördjupa</p><h2 id="metric-chart-title">Ett prestandamått i taget</h2></div><label for="metric-select">Visa mått <select id="metric-select"></select></label></div>
-      <div id="metric-chart" class="chart" role="img" aria-label="Trendgraf över valt prestandamått"></div>
     </section>
     <section class="history" aria-labelledby="history-title"><div class="section-heading"><div><p class="eyebrow">Historik</p><h2 id="history-title">Alla körningar</h2></div></div>
       <div class="table-wrap"><table><thead><tr><th scope="col">Tidpunkt</th><th scope="col">Totalt</th><th scope="col">Prestanda</th><th scope="col">Tillgänglighet</th><th scope="col">Detaljer</th></tr></thead><tbody id="history-body"></tbody></table></div>
