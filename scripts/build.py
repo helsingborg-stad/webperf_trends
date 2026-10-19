@@ -245,7 +245,7 @@ def result_table(items: list[dict[str, str]]) -> str:
         "<span class=\"visually-hidden\">Status: </span>{label}</td>"
         "<th scope=\"row\">{title}</th><td>{detail}</td></tr>".format(
             status=item["status"],
-            icon={"error": "✕", "warning": "!", "resolved": "✓"}[item["status"]],
+            icon={"error": "✕", "warning": "!", "resolved": "✓", "unknown": "•"}[item["status"]],
             label=STATUS_LABEL[item["status"]],
             title=html.escape(item["title"]),
             detail=(detail_markup(item["detail"]) or "—") + finding_markup(item.get("issues", [])),
