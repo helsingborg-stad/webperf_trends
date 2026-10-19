@@ -84,6 +84,11 @@ def run_summary(run_file: Path) -> dict[str, Any] | None:
         "scores": scores,
         "metrics": metrics,
         "meta": metadata,
+        "progress": {
+            "completed": metadata.get("completed_tests", []),
+            "failed": metadata.get("failed_tests", []),
+            "total": metadata.get("tests", []),
+        },
         "detail": f"reports/{run_id}.html",
     }
 
@@ -114,12 +119,19 @@ def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> st
     )
     raw_href = f"../data/runs/{run['id']}.json"
     url = run["url"] or site.get("url", "")
+    progress = run["progress"]
+    completed = ", ".join(str(test) for test in progress["completed"]) or "inga ännu"
+    failed = ", ".join(str(test) for test in progress["failed"])
+    total = len(progress["total"])
+    progress_text = f"{len(progress['completed'])} av {total} tester klara"
+    if failed:
+        progress_text += f" · tester med fel: {failed}"
     return f"""<!doctype html>
 <html lang=\"sv\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
 <title>Detaljrapport · {html.escape(run['display_date'])}</title><link rel=\"stylesheet\" href=\"../assets/site.css\"></head>
 <body><a class=\"skip-link\" href=\"#report\">Hoppa till rapporten</a><header class=\"site-header\"><div><a class=\"wordmark\" href=\"../\">Webperf trends</a><p>{html.escape(site.get('name', ''))}</p></div><a href=\"../\">Till översikten</a></header>
 <main id=\"report\" class=\"report-page\"><p class=\"eyebrow\">Detaljrapport</p><h1>{html.escape(run['display_date'])}</h1><p class=\"lede\">Mätt URL: <a href=\"{html.escape(url)}\">{html.escape(url)}</a></p>
-<dl class=\"score-list\">{score_markup(run['scores'])}</dl>{sections}
+<p class=\"run-progress\">{html.escape(progress_text)}</p><dl class=\"score-list\">{score_markup(run['scores'])}</dl>{sections}
 <details><summary>Tekniskt underlag</summary><p>Core-commit: <code>{html.escape(str(run['meta'].get('core_sha', 'okänd')))}</code></p><p><a href=\"{raw_href}\">Öppna råresultatet (JSON)</a></p></details></main></body></html>"""
 
 
