@@ -65,12 +65,22 @@ def human_date(value: str) -> str:
         return value.replace("T", " ").replace("Z", "")
 
 
+def combined_test(raw: dict[str, Any]) -> dict[str, Any] | None:
+    """Return Core's canonical multi-test entry, falling back for old runs."""
+    tests = raw.get("tests", []) if isinstance(raw, dict) else []
+    if not isinstance(tests, list):
+        return None
+    for test in reversed(tests):
+        if isinstance(test, dict) and test.get("type_of_test") == -1:
+            return test
+    return next((test for test in tests if isinstance(test, dict)), None)
+
+
 def run_summary(run_file: Path) -> dict[str, Any] | None:
     raw = load_json(run_file, {})
-    tests = raw.get("tests", []) if isinstance(raw, dict) else []
-    if not tests or not isinstance(tests[0], dict):
+    test = combined_test(raw)
+    if test is None:
         return None
-    test = tests[0]
     run_id = run_file.stem
     metadata = load_json(RUNS / f"{run_id}.meta.json", {})
     metrics: dict[str, float] = {}
@@ -202,7 +212,7 @@ def report_section(title: str, body: str) -> str:
 
 def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> str:
     raw = load_json(run_file, {})
-    test = raw.get("tests", [{}])[0]
+    test = combined_test(raw) or {}
     reports = [
         ("Övergripande", test.get("report", "")),
         ("Tillgänglighet", test.get("report_a11y", "")),
