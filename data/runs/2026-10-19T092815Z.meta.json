@@ -1,0 +1,14 @@
+{
+  "url": "https://helsingborg.se/",
+  "tests": [
+    "21"
+  ],
+  "completed_tests": [
+    "21"
+  ],
+  "failed_tests": [],
+  "active_test": "",
+  "core_sha": "3b3c34ebab52f9f85971bc854120daffe3c95f23",
+  "workflow_run": "39229957257",
+  "profile": "weekly-v1 / Sitespeed: 3 iterations"
+}
