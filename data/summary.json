@@ -256,11 +256,11 @@
     },
     {
       "id": "2026-10-19T131747Z",
-      "date": "2026-10-19T13:25:25.240036",
+      "date": "2026-10-19T13:25:42.745655",
       "display_date": "19 Oct 2026, 13:25",
       "url": "https://helsingborg.se/",
       "scores": {
-        "rating": null,
+        "rating": 5.0,
         "rating_perf": null,
         "rating_a11y": null,
         "rating_sec": null,
@@ -294,10 +294,11 @@
           "25",
           "31",
           "32",
-          "20"
+          "20",
+          "18"
         ],
         "failed_tests": [],
-        "active_test": "18",
+        "active_test": "",
         "core_sha": "91022abe0c68800e7eef7df7e5f2797e4f5b8b1f",
         "workflow_run": "39258385961",
         "profile": "weekly-v1 / Sitespeed: 3 iterations"
@@ -310,7 +311,8 @@
           "25",
           "31",
           "32",
-          "20"
+          "20",
+          "18"
         ],
         "failed": [],
         "total": [
@@ -331,7 +333,7 @@
           "2",
           "15"
         ],
-        "active": "18"
+        "active": ""
       },
       "detail": "reports/2026-10-19T131747Z.html"
     }
