@@ -188,6 +188,71 @@
         "active": ""
       },
       "detail": "reports/2026-10-19T120901Z.html"
+    },
+    {
+      "id": "2026-10-19T125022Z",
+      "date": "2026-10-19T12:50:22.585842",
+      "display_date": "19 Oct 2026, 12:50",
+      "url": "https://helsingborg.se/",
+      "scores": {
+        "rating": null,
+        "rating_perf": null,
+        "rating_a11y": null,
+        "rating_sec": null,
+        "rating_stand": null
+      },
+      "metrics": {},
+      "meta": {
+        "url": "https://helsingborg.se/",
+        "tests": [
+          "21",
+          "22",
+          "23",
+          "25",
+          "31",
+          "32",
+          "20",
+          "18",
+          "9",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "2",
+          "15"
+        ],
+        "completed_tests": [],
+        "failed_tests": [],
+        "active_test": "21",
+        "core_sha": "add78d036281c334fc3c73bf67f4e60feeb77c98",
+        "workflow_run": "39254825435",
+        "profile": "weekly-v1 / Sitespeed: 3 iterations"
+      },
+      "progress": {
+        "completed": [],
+        "failed": [],
+        "total": [
+          "21",
+          "22",
+          "23",
+          "25",
+          "31",
+          "32",
+          "20",
+          "18",
+          "9",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "2",
+          "15"
+        ],
+        "active": "21"
+      },
+      "detail": "reports/2026-10-19T125022Z.html"
     }
   ]
 }
