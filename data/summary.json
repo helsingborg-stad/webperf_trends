@@ -7,8 +7,8 @@
   "runs": [
     {
       "id": "2026-10-19T085008Z",
-      "date": "2026-10-19T08:52:44.809511",
-      "display_date": "19 Oct 2026, 08:52",
+      "date": "2026-10-19T08:55:17.918835",
+      "display_date": "19 Oct 2026, 08:55",
       "url": "https://helsingborg.se/",
       "scores": {
         "rating": 5.0,
@@ -17,7 +17,15 @@
         "rating_sec": 5.0,
         "rating_stand": 5.0
       },
-      "metrics": {},
+      "metrics": {
+        "mobile:TTFB": 944.5,
+        "mobile:LCP": 2762.5,
+        "mobile:Load": 4845.0,
+        "mobile:TBT": 6.5,
+        "mobile:CLS": 0.0,
+        "mobile:SpeedIndex": 2550.0,
+        "mobile:FCP": 0.0
+      },
       "meta": {
         "url": "https://helsingborg.se/",
         "tests": [
@@ -40,7 +48,8 @@
         ],
         "completed_tests": [
           "2",
-          "9"
+          "9",
+          "15"
         ],
         "failed_tests": [],
         "core_sha": "3dc614c58760f2bc6b7cfd3612fa06b0d4ecdbeb",
@@ -50,7 +59,8 @@
       "progress": {
         "completed": [
           "2",
-          "9"
+          "9",
+          "15"
         ],
         "failed": [],
         "total": [
