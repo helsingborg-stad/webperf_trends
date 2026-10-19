@@ -7,12 +7,12 @@
   "runs": [
     {
       "id": "2026-10-19T085008Z",
-      "date": "2026-10-19T09:07:39.561907",
-      "display_date": "19 Oct 2026, 09:07",
+      "date": "2026-10-19T09:08:32.878516",
+      "display_date": "19 Oct 2026, 09:08",
       "url": "https://helsingborg.se/",
       "scores": {
         "rating": 5.0,
-        "rating_perf": null,
+        "rating_perf": 1.0,
         "rating_a11y": 4.0,
         "rating_sec": 4.5,
         "rating_stand": 5.0
@@ -59,7 +59,8 @@
           "26",
           "27",
           "28",
-          "29"
+          "29",
+          "30"
         ],
         "failed_tests": [],
         "core_sha": "3dc614c58760f2bc6b7cfd3612fa06b0d4ecdbeb",
@@ -80,7 +81,8 @@
           "26",
           "27",
           "28",
-          "29"
+          "29",
+          "30"
         ],
         "failed": [],
         "total": [
