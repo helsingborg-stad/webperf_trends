@@ -106,7 +106,8 @@
           "30",
           "31",
           "32"
-        ]
+        ],
+        "active": ""
       },
       "detail": "reports/2026-10-19T085008Z.html"
     },
@@ -144,7 +145,8 @@
         "failed": [],
         "total": [
           "21"
-        ]
+        ],
+        "active": ""
       },
       "detail": "reports/2026-10-19T092815Z.html"
     },
@@ -182,7 +184,8 @@
         "failed": [],
         "total": [
           "22"
-        ]
+        ],
+        "active": ""
       },
       "detail": "reports/2026-10-19T120901Z.html"
     }

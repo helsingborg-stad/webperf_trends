@@ -103,6 +103,103 @@ def score_markup(scores: dict[str, float | None]) -> str:
     return "".join(rows) or "<dt>Poäng</dt><dd>Ingen poäng kunde läsas</dd>"
 
 
+STATUS = {
+    "fel": "error",
+    "error": "error",
+    "varning": "warning",
+    "warning": "warning",
+    "löst": "resolved",
+    "lost": "resolved",
+    "resolved": "resolved",
+}
+STATUS_LABEL = {
+    "error": "Fel",
+    "warning": "Varning",
+    "resolved": "Godkänd",
+    "unknown": "Okänd status",
+}
+
+
+def parse_report_items(body: str) -> list[dict[str, str]]:
+    """Turn Core's human-readable bullet list into structured report rows."""
+    items: list[dict[str, str]] = []
+    current: dict[str, str] | None = None
+    heading = re.compile(r"^- (?P<title>.+?) \((?P<status>[^()]+)\)\s*$")
+    for line in body.splitlines():
+        match = heading.match(line)
+        if match:
+            if current:
+                items.append(current)
+            status_word = match.group("status").strip().lower()
+            current = {
+                "title": match.group("title").strip(),
+                "status": STATUS.get(status_word, "unknown"),
+                "detail": "",
+            }
+        elif current and line.strip():
+            detail = line.strip()
+            current["detail"] = f"{current['detail']}\n{detail}".strip()
+    if current:
+        items.append(current)
+    return items
+
+
+def detail_markup(value: str) -> str:
+    return "<br>".join(html.escape(line) for line in value.splitlines())
+
+
+def result_table(items: list[dict[str, str]]) -> str:
+    rows = "".join(
+        "<tr class=\"result-row result-row--{status}\">"
+        "<td class=\"result-status\"><span aria-hidden=\"true\">{icon}</span> "
+        "<span class=\"visually-hidden\">Status: </span>{label}</td>"
+        "<th scope=\"row\">{title}</th><td>{detail}</td></tr>".format(
+            status=item["status"],
+            icon={"error": "✕", "warning": "!", "resolved": "✓"}[item["status"]],
+            label=STATUS_LABEL[item["status"]],
+            title=html.escape(item["title"]),
+            detail=detail_markup(item["detail"]) or "—",
+        )
+        for item in items
+    )
+    return (
+        "<div class=\"result-table-wrap\"><table class=\"result-table\">"
+        "<thead><tr><th scope=\"col\">Resultat</th><th scope=\"col\">Kontroll</th>"
+        "<th scope=\"col\">Detaljer</th></tr></thead><tbody>"
+        f"{rows}</tbody></table></div>"
+    )
+
+
+def report_section(title: str, body: str) -> str:
+    items = parse_report_items(body)
+    errors = [item for item in items if item["status"] == "error"]
+    warnings = [item for item in items if item["status"] == "warning"]
+    resolved = [item for item in items if item["status"] == "resolved"]
+    unknown = [item for item in items if item["status"] == "unknown"]
+    problem_items = [*errors, *warnings, *unknown]
+    counts = []
+    if errors:
+        counts.append(f"<span class=\"count count--error\">✕ {len(errors)} fel</span>")
+    if warnings:
+        counts.append(f"<span class=\"count count--warning\">! {len(warnings)} varningar</span>")
+    if resolved:
+        counts.append(f"<span class=\"count count--resolved\">✓ {len(resolved)} godkända</span>")
+    if not items:
+        content = "<p class=\"no-results\">Inga anmärkningar eller detaljer i denna kategori.</p>"
+    else:
+        content = result_table(problem_items) if problem_items else "<p class=\"all-clear\">✓ Inga fel eller varningar i denna kategori.</p>"
+        if resolved:
+            content += (
+                "<details class=\"resolved-details\"><summary>"
+                f"Visa {len(resolved)} godkända kontroller</summary>{result_table(resolved)}</details>"
+            )
+    return (
+        "<section class=\"report-section\"><header class=\"report-section-heading\">"
+        f"<h2>{html.escape(title)}</h2><p class=\"result-counts\">{''.join(counts)}</p>"
+        f"</header>{content}</section>"
+    )
+
+
 def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> str:
     raw = load_json(run_file, {})
     test = raw.get("tests", [{}])[0]
@@ -113,11 +210,7 @@ def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> st
         ("Integritet & säkerhet", test.get("report_sec", "")),
         ("Webbstandard", test.get("report_stand", "")),
     ]
-    sections = "".join(
-        f"<section class=\"report-section\"><h2>{html.escape(title)}</h2>"
-        f"<pre>{html.escape(body.strip() or 'Inga anmärkningar eller detaljer i denna kategori.')}</pre></section>"
-        for title, body in reports
-    )
+    sections = "".join(report_section(title, body) for title, body in reports)
     raw_href = f"../data/runs/{run['id']}.json"
     url = run["url"] or site.get("url", "")
     progress = run["progress"]
