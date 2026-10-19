@@ -109,6 +109,27 @@
         ]
       },
       "detail": "reports/2026-10-19T085008Z.html"
+    },
+    {
+      "id": "2026-10-19T092815Z",
+      "date": "2026-10-19T09:28:15.804404",
+      "display_date": "19 Oct 2026, 09:28",
+      "url": "",
+      "scores": {
+        "rating": null,
+        "rating_perf": null,
+        "rating_a11y": null,
+        "rating_sec": null,
+        "rating_stand": null
+      },
+      "metrics": {},
+      "meta": {},
+      "progress": {
+        "completed": [],
+        "failed": [],
+        "total": []
+      },
+      "detail": "reports/2026-10-19T092815Z.html"
     }
   ]
 }
