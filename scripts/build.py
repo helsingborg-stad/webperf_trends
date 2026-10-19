@@ -127,7 +127,7 @@ STATUS_LABEL = {
     "error": "Fel",
     "warning": "Varning",
     "resolved": "Godkänd",
-    "unknown": "Okänd status",
+    "unknown": "Kunde inte köras",
 }
 
 
@@ -260,15 +260,11 @@ def result_table(items: list[dict[str, str]]) -> str:
     )
 
 
-def report_section(title: str, body: str, findings: dict[str, list[dict[str, Any]]]) -> str:
-    items = parse_report_items(body)
-    for item in items:
-        item["issues"] = findings.get(report_key(item["title"]), [])
+def report_section(title: str, items: list[dict[str, str]]) -> str:
     errors = [item for item in items if item["status"] == "error"]
     warnings = [item for item in items if item["status"] == "warning"]
     resolved = [item for item in items if item["status"] == "resolved"]
-    unknown = [item for item in items if item["status"] == "unknown"]
-    problem_items = [*errors, *warnings, *unknown]
+    problem_items = [*errors, *warnings]
     counts = []
     if errors:
         counts.append(f"<span class=\"count count--error\">✕ {len(errors)} fel</span>")
@@ -292,6 +288,18 @@ def report_section(title: str, body: str, findings: dict[str, list[dict[str, Any
     )
 
 
+def unavailable_tests_markup(items: list[dict[str, str]]) -> str:
+    """Keep incomplete test output separate from actionable findings."""
+    if not items:
+        return ""
+    return (
+        '<section class="report-section unavailable-section"><details class="unavailable-details">'
+        f'<summary>Tester som inte kunde köras ({len(items)})</summary>'
+        '<p>Webperf kunde inte tolka ett resultat för dessa kontroller. De räknas inte som fel i rapporten.</p>'
+        f'{result_table(items)}</details></section>'
+    )
+
+
 def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> str:
     raw = load_json(run_file, {})
     test = combined_test(raw) or {}
@@ -303,7 +311,18 @@ def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> st
         ("Webbstandard", test.get("report_stand", "")),
     ]
     findings = issue_index(test)
-    sections = "".join(report_section(title, body, findings) for title, body in reports)
+    parsed_reports = []
+    unavailable = []
+    for title, body in reports:
+        items = parse_report_items(body)
+        for item in items:
+            item["issues"] = findings.get(report_key(item["title"]), [])
+            if item["status"] == "unknown":
+                item["category"] = title
+                unavailable.append(item)
+        parsed_reports.append((title, [item for item in items if item["status"] != "unknown"]))
+    sections = "".join(report_section(title, items) for title, items in parsed_reports)
+    sections += unavailable_tests_markup(unavailable)
     raw_href = f"../data/runs/{run['id']}.json"
     url = run["url"] or site.get("url", "")
     progress = run["progress"]
