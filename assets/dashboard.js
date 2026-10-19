@@ -44,13 +44,17 @@ function metricOverview(target, legend, runs) {
   const primaryMax = Math.max(...primaryValues, 1); const clsMax = Math.max(...clsValues, .01); const width = Math.max(620, runs.length * 105); const height = 320; const pad = { top:20, right:58, bottom:54, left:58 };
   const x = index => pad.left + index * ((width - pad.left - pad.right) / Math.max(runs.length - 1, 1));
   const y = (value, max) => height - pad.bottom - (value / max) * (height - pad.top - pad.bottom);
-  const lineFor = (key, max) => runs.reduce((path, run, index) => { const value = run.metrics?.[key]; return typeof value === "number" ? `${path}${path && !path.endsWith("M ") ? "L" : "M"}${x(index).toFixed(1)} ${y(value, max).toFixed(1)} ` : `${path}M `; }, "").replace(/M\s*$/, "");
+  const lineSegments = (key, max) => {
+    const segments = []; let segment = [];
+    runs.forEach((run, index) => { const value = run.metrics?.[key]; if (typeof value === "number") segment.push(`${x(index).toFixed(1)},${y(value, max).toFixed(1)}`); else if (segment.length) { segments.push(segment); segment = []; } });
+    if (segment.length) segments.push(segment); return segments;
+  };
   const timeLabel = value => value.includes(", ") ? value.split(", ").at(-1) : value;
   let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">`;
   for (let index = 0; index < 5; index++) { const ratio = index / 4; const yy = y(primaryMax * ratio, primaryMax); svg += `<line class="grid" x1="${pad.left}" x2="${width-pad.right}" y1="${yy}" y2="${yy}"/><text x="4" y="${yy+4}">${Math.round(primaryMax * ratio)} ms</text>`; if (clsKey) svg += `<text x="${width-pad.right+7}" y="${yy+4}">${(clsMax * ratio).toFixed(3)}</text>`; }
   svg += `<line class="axis" x1="${pad.left}" x2="${width-pad.right}" y1="${height-pad.bottom}" y2="${height-pad.bottom}"/>`;
   runs.forEach((run, index) => { const xx = x(index); svg += `<text class="x-label" x="${xx}" y="${height-16}" text-anchor="middle">${escapeHtml(timeLabel(run.display_date))}</text>`; });
-  keys.forEach(key => { const max = key === clsKey ? clsMax : primaryMax; const color = metricColors[key]; svg += `<g class="series" data-series="${key}"><path class="line" stroke="${color}" d="${lineFor(key, max)}"/>`; runs.forEach((run, index) => { const value = run.metrics?.[key]; if (typeof value === "number") { const display = key === clsKey ? value.toFixed(3) : `${Math.round(value)} ms`; svg += `<circle class="dot" fill="${color}" cx="${x(index)}" cy="${y(value, max)}" r="3.5"><title>${metricNames[key]}: ${display}</title></circle>`; } }); svg += "</g>"; });
+  keys.forEach(key => { const max = key === clsKey ? clsMax : primaryMax; const color = metricColors[key]; svg += `<g class="series" data-series="${key}">`; lineSegments(key, max).forEach(points => { svg += `<polyline class="line" stroke="${color}" points="${points.join(" ")}"/>`; }); runs.forEach((run, index) => { const value = run.metrics?.[key]; if (typeof value === "number") { const display = key === clsKey ? value.toFixed(3) : `${Math.round(value)} ms`; svg += `<circle class="dot" fill="${color}" cx="${x(index)}" cy="${y(value, max)}" r="3.5"><title>${metricNames[key]}: ${display}</title></circle>`; } }); svg += "</g>"; });
   target.innerHTML = `${svg}</svg>`;
   renderLegend(legend, keys.map(key => ({ key, color:metricColors[key], name:`${metricNames[key]}${key === clsKey ? " (CLS, höger axel)" : ""}` })));
   enableSeriesFocus(target, legend);
