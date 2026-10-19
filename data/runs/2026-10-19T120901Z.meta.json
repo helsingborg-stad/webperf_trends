@@ -3,9 +3,11 @@
   "tests": [
     "22"
   ],
-  "completed_tests": [],
+  "completed_tests": [
+    "22"
+  ],
   "failed_tests": [],
-  "active_test": "22",
+  "active_test": "",
   "core_sha": "3c13d8b6f076a243ddc0ec9cd4b0b51cf32a3ddc",
   "workflow_run": "39249174153",
   "profile": "weekly-v1 / Sitespeed: 3 iterations"
