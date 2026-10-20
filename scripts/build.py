@@ -128,7 +128,9 @@ STATUS_LABEL = {
     "warning": "Varning",
     "resolved": "Godkänd",
     "unknown": "Kunde inte köras",
+    "rated": "Betyg",
 }
+RATING = re.compile(r"^(?P<score>\d+(?:[.,]\d+)?)\s+betyg$", re.I)
 
 
 def parse_report_items(body: str) -> list[dict[str, str]]:
@@ -142,9 +144,11 @@ def parse_report_items(body: str) -> list[dict[str, str]]:
             if current:
                 items.append(current)
             status_word = match.group("status").strip().lower()
+            rating = RATING.fullmatch(status_word)
             current = {
                 "title": match.group("title").strip(),
-                "status": STATUS.get(status_word, "unknown"),
+                "status": "rated" if rating else STATUS.get(status_word, "unknown"),
+                "rating": rating.group("score").replace(",", ".") if rating else "",
                 "detail": "",
             }
         elif current and line.strip():
@@ -245,8 +249,8 @@ def result_table(items: list[dict[str, str]]) -> str:
         "<span class=\"visually-hidden\">Status: </span>{label}</td>"
         "<th scope=\"row\">{title}</th><td>{detail}</td></tr>".format(
             status=item["status"],
-            icon={"error": "✕", "warning": "!", "resolved": "✓", "unknown": "•"}[item["status"]],
-            label=STATUS_LABEL[item["status"]],
+            icon={"error": "✕", "warning": "!", "resolved": "✓", "unknown": "•", "rated": "●"}[item["status"]],
+            label=(f"Betyg {item['rating']} / 5" if item["status"] == "rated" else STATUS_LABEL[item["status"]]),
             title=html.escape(item["title"]),
             detail=(detail_markup(item["detail"]) or "—") + finding_markup(item.get("issues", [])),
         )
@@ -300,6 +304,18 @@ def unavailable_tests_markup(items: list[dict[str, str]]) -> str:
     )
 
 
+def rated_tests_markup(items: list[dict[str, str]]) -> str:
+    """Preserve detailed scored checks without confusing them with failures."""
+    if not items:
+        return ""
+    return (
+        '<section class="report-section rated-section"><details class="rated-details">'
+        f'<summary>Detaljerade betyg ({len(items)})</summary>'
+        '<p>Kompletterande delresultat från Webperf. Ett högre betyg är bättre.</p>'
+        f'{result_table(items)}</details></section>'
+    )
+
+
 def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> str:
     raw = load_json(run_file, {})
     test = combined_test(raw) or {}
@@ -313,6 +329,7 @@ def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> st
     findings = issue_index(test)
     parsed_reports = []
     unavailable = []
+    rated = []
     for title, body in reports:
         items = parse_report_items(body)
         for item in items:
@@ -320,8 +337,12 @@ def report_page(run_file: Path, run: dict[str, Any], site: dict[str, Any]) -> st
             if item["status"] == "unknown":
                 item["category"] = title
                 unavailable.append(item)
-        parsed_reports.append((title, [item for item in items if item["status"] != "unknown"]))
+            if item["status"] == "rated":
+                item["category"] = title
+                rated.append(item)
+        parsed_reports.append((title, [item for item in items if item["status"] not in {"unknown", "rated"}]))
     sections = "".join(report_section(title, items) for title, items in parsed_reports)
+    sections += rated_tests_markup(rated)
     sections += unavailable_tests_markup(unavailable)
     raw_href = f"../data/runs/{run['id']}.json"
     url = run["url"] or site.get("url", "")
